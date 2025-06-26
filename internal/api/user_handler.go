@@ -134,7 +134,6 @@ func (uh *UserHandler) HandleLogin(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
-	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie("session_token", tokens.SessionToken.PlainText, 3600, "/", "localhost", false, true)
 	c.SetCookie("csrf_token", tokens.CSRFToken.PlainText, 3600, "/", "localhost", false, false)
 	c.String(http.StatusOK, "Login successful!")
