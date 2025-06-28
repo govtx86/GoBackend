@@ -151,10 +151,10 @@ func (uh *UserHandler) HandleLogout(c *gin.Context) {
 			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
 		}
+		c.SetCookie("session_token", "", -1, "/", "localhost", false, true)
+		c.SetCookie("csrf_token", "", -1, "/", "localhost", false, false)
 		c.String(http.StatusOK, "Logout successful!")
 	}
-	c.SetCookie("session_token", "", -1, "/", "localhost", false, true)
-	c.SetCookie("csrf_token", "", -1, "/", "localhost", false, false)
 }
 
 func (uh *UserHandler) HandleProtected(c *gin.Context) {

@@ -36,20 +36,18 @@ func GetUser(c *gin.Context) *store.User {
 
 func (um *UserMiddleware) Authenticate() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		request := struct {
-			Csrf_token string `json:"csrf_token" form:"csrf_token" binding:"required"`
-		}{}
-		err := c.ShouldBind(&request)
-		if err != nil {
+		csrf_token := c.GetHeader("X-CSRF-Token")
+
+		if csrf_token == "" {
 			SetUser(store.AnonymousUser, c)
 			return
 		}
 		session_token, err := c.Cookie("session_token")
-		if err != nil || session_token == "" || request.Csrf_token == "" {
+		if err != nil || session_token == "" || csrf_token == "" {
 			SetUser(store.AnonymousUser, c)
 			return
 		}
-		token, err := um.TokenStore.GetToken(utils.HashToken(session_token), utils.HashToken(request.Csrf_token))
+		token, err := um.TokenStore.GetToken(utils.HashToken(session_token), utils.HashToken(csrf_token))
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				SetUser(store.AnonymousUser, c)
