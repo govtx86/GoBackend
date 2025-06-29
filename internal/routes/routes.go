@@ -17,16 +17,15 @@ func SetupRoutes(app *app.Application) http.Handler {
 		AllowCredentials: true, // Enable cookies/auth
 	}))
 
-	r.GET("/", func(c *gin.Context) {
+	r.GET("/status", func(c *gin.Context) {
 		c.String(http.StatusOK, "Hello World!")
 	})
 
-	r.GET("/messages", app.MessageHandler.HandleGetMessage)
-	r.POST("/messages", app.MessageHandler.HandleCreateMessage)
-
 	r.POST("/register", app.UserHandler.HandleRegister)
 	r.POST("/login", app.UserHandler.HandleLogin)
-
+	r.MaxMultipartMemory = 8 << 20 // 8 MiB
+	r.Static("/static/images", "./files/static/images/")
+	r.POST("/images/upload", app.PostHandler.HandleUploadImage)
 	{
 		auth := r.Group("/")
 		auth.Use(app.Middleware.Authenticate())
@@ -34,6 +33,7 @@ func SetupRoutes(app *app.Application) http.Handler {
 		{
 			reqlogin := auth.Group("/")
 			reqlogin.Use(app.Middleware.RequreLogin())
+			reqlogin.GET("/user", app.UserHandler.HandleGetuser)
 			reqlogin.GET("/protected", app.UserHandler.HandleProtected)
 		}
 	}

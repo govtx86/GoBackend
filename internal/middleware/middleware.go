@@ -28,7 +28,7 @@ func GetUser(c *gin.Context) *store.User {
 	user, ok := c.Keys["user"].(*store.User)
 	if !ok {
 		c.Abort()
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "missing user in header"})
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "missing user in header"})
 		return nil
 	}
 	return user
@@ -79,7 +79,7 @@ func (um *UserMiddleware) RequreLogin() gin.HandlerFunc {
 		user := GetUser(c)
 		if user.IsAnonymous() {
 			c.Abort()
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "invalid session"})
+			c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "invalid session"})
 			return
 		}
 		c.Next()

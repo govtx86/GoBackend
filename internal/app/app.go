@@ -12,8 +12,8 @@ import (
 
 type Application struct {
 	Logger         *log.Logger
-	MessageHandler *api.MessageHandler
 	UserHandler    *api.UserHandler
+	PostHandler *api.PostHandler
 	Middleware     middleware.UserMiddleware
 	DB             *gorm.DB
 }
@@ -26,12 +26,12 @@ func NewApplication() (*Application, error) {
 
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 
-	messageStore := store.NewPostgresMessageStore(pgDB)
+
 	userStore := store.NewPostgresUserStore(pgDB)
 	tokenStore := store.NewPostgresTokenStore(pgDB)
 
-	messageHandler := api.NewMessageHandler(messageStore, logger)
 	userHandler := api.NewUserHanlder(userStore, tokenStore, logger)
+	postHandler := api.NewPostHanlder(logger)
 
 	userMidleware := middleware.UserMiddleware{
 		UserStore:  userStore,
@@ -41,8 +41,8 @@ func NewApplication() (*Application, error) {
 
 	app := &Application{
 		Logger:         logger,
-		MessageHandler: messageHandler,
 		UserHandler:    userHandler,
+		PostHandler: postHandler,
 		Middleware:     userMidleware,
 		DB:             pgDB,
 	}

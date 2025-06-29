@@ -137,7 +137,7 @@ func (uh *UserHandler) HandleLogin(c *gin.Context) {
 	c.SetCookie("session_token", tokens.SessionToken.PlainText, 3600, "/", "localhost", false, true)
 	c.SetCookie("csrf_token", tokens.CSRFToken.PlainText, 3600, "/", "localhost", false, false)
 	c.String(http.StatusOK, "Login successful!")
-	
+
 }
 
 func (uh *UserHandler) HandleLogout(c *gin.Context) {
@@ -159,4 +159,12 @@ func (uh *UserHandler) HandleLogout(c *gin.Context) {
 
 func (uh *UserHandler) HandleProtected(c *gin.Context) {
 	c.String(http.StatusOK, "Protected Message")
+}
+
+func (uh *UserHandler) HandleGetuser(c *gin.Context) {
+	user := middleware.GetUser(c)
+	c.IndentedJSON(http.StatusOK, gin.H{
+		"username": user.Username,
+		"email":    user.Email,
+	})
 }
