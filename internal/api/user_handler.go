@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
 	"todoapp/internal/middleware"
 	"todoapp/internal/store"
@@ -32,6 +33,8 @@ type RegisterUserRequest struct {
 	Email    string `json:"email" form:"email" binding:"required"`
 	Password string `json:"password" form:"password" binding:"required"`
 }
+
+var frontendURL = os.Getenv("FRONTEND_URL")
 
 func (uh *UserHandler) HandleRegister(c *gin.Context) {
 	request := RegisterUserRequest{}
@@ -134,8 +137,8 @@ func (uh *UserHandler) HandleLogin(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
-	c.SetCookie("session_token", tokens.SessionToken.PlainText, 3600, "/", "localhost", false, true)
-	c.SetCookie("csrf_token", tokens.CSRFToken.PlainText, 3600, "/", "localhost", false, false)
+	c.SetCookie("session_token", tokens.SessionToken.PlainText, 3600, "/", frontendURL, false, true)
+	c.SetCookie("csrf_token", tokens.CSRFToken.PlainText, 3600, "/", frontendURL, false, false)
 	c.String(http.StatusOK, "Login successful!")
 
 }
@@ -151,8 +154,8 @@ func (uh *UserHandler) HandleLogout(c *gin.Context) {
 			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
 		}
-		c.SetCookie("session_token", "", -1, "/", "localhost", false, true)
-		c.SetCookie("csrf_token", "", -1, "/", "localhost", false, false)
+		c.SetCookie("session_token", "", -1, "/", frontendURL, false, true)
+		c.SetCookie("csrf_token", "", -1, "/", frontendURL, false, false)
 		c.String(http.StatusOK, "Logout successful!")
 	}
 }

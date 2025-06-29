@@ -11,6 +11,7 @@ import (
 	"time"
 	"todoapp/internal/app"
 	"todoapp/internal/routes"
+	_ "github.com/joho/godotenv/autoload"
 )
 
 func gracefulShutdown(apiServer *http.Server, done chan bool) {
@@ -21,7 +22,7 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 	// Listen for the interrupt signal.
 	<-ctx.Done()
 
-	log.Println("shutting down gracefully, press Ctrl+C again to force")
+	log.Println("Shutting down gracefully, press Ctrl+C again to force")
 	stop() // Allow Ctrl+C to force shutdown
 
 	// The context is used to inform the server it has 5 seconds to finish
