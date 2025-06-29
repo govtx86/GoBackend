@@ -12,10 +12,10 @@ type Token struct {
 	ID           int       `json:"-"`
 	UserID       uuid.UUID `gorm:"not null;"`
 	User         User      `gorm:"constraint:OnDelete:CASCADE;"`
-	CreatedAt    time.Time `json:"-"`
-	UpdatedAt    time.Time `json:"-"`
 	SessionToken TokenItem `gorm:"embedded;embeddedPrefix:session_token_" json:"-"`
 	CSRFToken    TokenItem `gorm:"embedded;embeddedPrefix:csrf_token_" json:"-"`
+	CreatedAt    time.Time `json:"-"`
+	UpdatedAt    time.Time `json:"-"`
 }
 
 type TokenItem struct {
