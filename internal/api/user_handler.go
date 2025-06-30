@@ -119,7 +119,7 @@ func (uh *UserHandler) HandleLogin(c *gin.Context) {
 	user, err := uh.userStore.GetUserByUsername(request.Username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.IndentedJSON(http.StatusNotFound, gin.H{"error": "user not registerd"})
+			c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "user not registerd"})
 			return
 		}
 		uh.logger.Printf("ERROR: loginGetUserByUsername: %v\n", err)

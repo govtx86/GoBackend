@@ -1,6 +1,6 @@
 services:
   db:
-    container_name: "messageDB"
+    container_name: "myDB"
     image: postgres:latest
     volumes:
       - "./database/postgres-data:/var/lib/postgresql/data:rw"
