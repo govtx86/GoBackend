@@ -33,6 +33,8 @@ func NewPostgresPostStore(db *gorm.DB) *PostgresPostStore {
 
 type PostStore interface {
 	CreatePost(*Post) error
+	GetAllPosts() ([]Post, error)
+	GetPostByID(uuid.UUID) (*Post, error)
 }
 
 func (pg *PostgresPostStore) CreatePost(post *Post) error {
@@ -42,3 +44,22 @@ func (pg *PostgresPostStore) CreatePost(post *Post) error {
 	}
 	return nil
 }
+
+func (pg *PostgresPostStore) GetAllPosts() ([]Post, error) {
+	var posts []Post
+	result := pg.db.Select("id", "title").Find(&posts)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return posts, nil
+}
+
+func (pg *PostgresPostStore) GetPostByID(id uuid.UUID) (*Post, error) {
+	var post Post
+	result := pg.db.First(&post, id)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &post, nil
+}
+

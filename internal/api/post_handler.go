@@ -58,3 +58,28 @@ func (ph *PostHandler) HandleUploadImage(c *gin.Context) {
 	c.SaveUploadedFile(file, "./files/static/images/"+filename)
 	c.JSON(http.StatusOK, gin.H{"url": fmt.Sprintf("http://%v/static/images/%v", c.Request.Host, filename)})
 }
+
+func (ph *PostHandler) HandleGetAllPosts(c *gin.Context) {
+	posts, err := ph.postStore.GetAllPosts()
+	if err != nil {
+		ph.logger.Printf("ERROR: handleGetAllPosts: %v\n", err)
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		return
+	}
+	c.IndentedJSON(http.StatusOK, posts)
+}
+
+func (ph *PostHandler) HandleGetPostByID(c *gin.Context) {
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+		return
+	}
+	post, err := ph.postStore.GetPostByID(id)
+	if err != nil {
+		ph.logger.Printf("ERROR: handleGetPostByID: %v\n", err)
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		return
+	}
+	c.IndentedJSON(http.StatusOK, post)
+}

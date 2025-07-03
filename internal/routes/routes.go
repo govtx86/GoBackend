@@ -42,6 +42,8 @@ func SetupRoutes(app *app.Application) http.Handler {
 			reqlogin.POST("/posts/new", app.PostHandler.HandleCreatePost)
 		}
 	}
+	r.GET("/posts", app.PostHandler.HandleGetAllPosts)
+	r.GET("/post/:id", app.PostHandler.HandleGetPostByID)
 	
 	return r
 }
