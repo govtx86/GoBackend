@@ -29,9 +29,10 @@ func NewApplication() (*Application, error) {
 
 	userStore := store.NewPostgresUserStore(pgDB)
 	tokenStore := store.NewPostgresTokenStore(pgDB)
+	postStore := store.NewPostgresPostStore(pgDB)
 
 	userHandler := api.NewUserHanlder(userStore, tokenStore, logger)
-	postHandler := api.NewPostHanlder(logger)
+	postHandler := api.NewPostHanlder(postStore, logger)
 
 	userMidleware := middleware.UserMiddleware{
 		UserStore:  userStore,

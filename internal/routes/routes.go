@@ -23,6 +23,9 @@ func SetupRoutes(app *app.Application) http.Handler {
 		c.String(http.StatusOK, "Hello World!")
 	})
 
+	r.MaxMultipartMemory = 8 << 20 // 8 MiB
+	r.Static("/static/images", "./files/static/images/")
+
 	r.POST("/register", app.UserHandler.HandleRegister)
 	r.POST("/login", app.UserHandler.HandleLogin)
 	{
@@ -34,12 +37,11 @@ func SetupRoutes(app *app.Application) http.Handler {
 			reqlogin.Use(app.Middleware.RequreLogin())
 			reqlogin.GET("/user", app.UserHandler.HandleGetuser)
 			reqlogin.GET("/protected", app.UserHandler.HandleProtected)
+
+			reqlogin.POST("/posts/image/upload", app.PostHandler.HandleUploadImage)
+			reqlogin.POST("/posts/new", app.PostHandler.HandleCreatePost)
 		}
 	}
-
-	r.MaxMultipartMemory = 8 << 20 // 8 MiB
-	r.Static("/static/images", "./files/static/images/")
-	r.POST("/images/upload", app.PostHandler.HandleUploadImage)
 	
 	return r
 }
