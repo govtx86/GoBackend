@@ -28,13 +28,13 @@ func NewUserHanlder(userStore store.UserStore, tokenStore store.TokenStore, logg
 	}
 }
 
+var domain = os.Getenv("DOMAIN")
+
 type RegisterUserRequest struct {
 	Username string `json:"username" form:"username" binding:"required"`
 	Email    string `json:"email" form:"email" binding:"required"`
 	Password string `json:"password" form:"password" binding:"required"`
 }
-
-var frontendURL = os.Getenv("FRONTEND_URL")
 
 func (uh *UserHandler) HandleRegister(c *gin.Context) {
 	request := RegisterUserRequest{}
@@ -106,17 +106,17 @@ func validateRegisterRequest(request RegisterUserRequest) error {
 }
 
 func (uh *UserHandler) HandleLogin(c *gin.Context) {
-	request := struct {
+	requestUser := struct {
 		Username string `json:"username" form:"username" binding:"required"`
 		Password string `json:"password" form:"password" binding:"required"`
 	}{}
-	err := c.ShouldBind(&request)
+	err := c.ShouldBind(&requestUser)
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
 		return
 	}
 
-	user, err := uh.userStore.GetUserByUsername(request.Username)
+	user, err := uh.userStore.GetUserByUsername(requestUser.Username)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "user not registerd"})
@@ -126,7 +126,7 @@ func (uh *UserHandler) HandleLogin(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
-	if !utils.CheckPasswordHash(request.Password, user.PasswordHash) {
+	if !utils.CheckPasswordHash(requestUser.Password, user.PasswordHash) {
 		c.IndentedJSON(http.StatusUnauthorized, gin.H{"error": "invalid password"})
 		return
 	}
@@ -137,10 +137,9 @@ func (uh *UserHandler) HandleLogin(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 		return
 	}
-	c.SetCookie("session_token", tokens.SessionToken.PlainText, 3600, "/", frontendURL, false, true)
-	c.SetCookie("csrf_token", tokens.CSRFToken.PlainText, 3600, "/", frontendURL, false, false)
-	c.String(http.StatusOK, "Login successful!")
-
+	c.SetCookie("session_token", tokens.SessionToken.PlainText, 3600, "/", domain, false, true)
+	c.SetCookie("csrf_token", tokens.CSRFToken.PlainText, 3600, "/", domain, false, false)
+	c.JSON(http.StatusOK, gin.H{"id": user.ID, "username": user.Username, "email": user.Email})
 }
 
 func (uh *UserHandler) HandleLogout(c *gin.Context) {
@@ -154,8 +153,8 @@ func (uh *UserHandler) HandleLogout(c *gin.Context) {
 			c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
 			return
 		}
-		c.SetCookie("session_token", "", -1, "/", frontendURL, false, true)
-		c.SetCookie("csrf_token", "", -1, "/", frontendURL, false, false)
+		c.SetCookie("session_token", "", -1, "/", domain, false, true)
+		c.SetCookie("csrf_token", "", -1, "/", domain, false, false)
 		c.String(http.StatusOK, "Logout successful!")
 	}
 }
@@ -167,6 +166,7 @@ func (uh *UserHandler) HandleProtected(c *gin.Context) {
 func (uh *UserHandler) HandleGetuser(c *gin.Context) {
 	user := middleware.GetUser(c)
 	c.IndentedJSON(http.StatusOK, gin.H{
+		"id": user.ID,
 		"username": user.Username,
 		"email":    user.Email,
 	})
